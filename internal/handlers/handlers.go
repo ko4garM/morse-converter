@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/Yandex-Practicum/go1fl-sprint6-final/internal/service"
@@ -14,12 +15,14 @@ import (
 
 // GetHTML возвращает HTML форму
 func GetHTML(w http.ResponseWriter, r *http.Request) {
-	content, err := os.ReadFile("../index.html")
+	content, err := os.ReadFile("index.html")
 	if err != nil {
-		http.Error(w, "Unable to read file", http.StatusInternalServerError)
-		return
+		content, err = os.ReadFile("../index.html")
+		if err != nil {
+			http.Error(w, "Unable to read file", http.StatusInternalServerError)
+			return
+		}
 	}
-
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
 	w.Write(content)
@@ -44,7 +47,7 @@ func UploadHTML(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Unable to read file content", http.StatusInternalServerError)
 		return
 	}
-
+	originalContent := strings.TrimSpace(string(fileContent))
 	convertedContent := service.TextConverter(string(fileContent))
 	if convertedContent == "" {
 		http.Error(w, "Unable empty string", http.StatusInternalServerError)
@@ -64,7 +67,7 @@ func UploadHTML(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(fmt.Sprintf(
-		"Original file: %s\nSaved as: %s\n\nResult:\n\n%s",
-		handler.Filename, outputFilename, convertedContent,
+		"Original file: %s\nSaved as: %s\n\nOriginalText: %s\n\nResult:\n\n%s",
+		handler.Filename, outputFilename, originalContent, convertedContent,
 	)))
 }
