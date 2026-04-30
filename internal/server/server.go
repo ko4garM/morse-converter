@@ -17,7 +17,7 @@ type Server struct {
 func NewServer(logger *log.Logger) *Server {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", handlers.GetHTML)
-	mux.HandleFunc("/upload", handlers.UploadHTML)
+	mux.HandleFunc("POST /upload", handlers.UploadHTML)
 
 	httpServer := &http.Server{
 		Addr:         ":8080",
